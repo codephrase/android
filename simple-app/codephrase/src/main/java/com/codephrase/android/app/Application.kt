@@ -9,10 +9,10 @@ abstract class Application : android.app.Application() {
         get() = 0
 
     init {
-        context = this
+        instance = this
     }
 
     companion object {
-        lateinit var context: Application
+        internal lateinit var instance: Application
     }
 }
