@@ -1,0 +1,13 @@
+<resources>
+    <style name="Base.Theme.CodePhrase" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.CodePhrase" parent="Base.Theme.CodePhrase" />
+
+    <style name="Theme.CodePhrase.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.CodePhrase.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+</resources>
