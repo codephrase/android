@@ -8,7 +8,6 @@ import android.support.v4.content.ContextCompat
 import android.util.TypedValue
 
 class ResourceHelper private constructor() {
-
     companion object {
         fun getString(resId: Int): String {
             return ApplicationHelper.getResources().getString(resId)

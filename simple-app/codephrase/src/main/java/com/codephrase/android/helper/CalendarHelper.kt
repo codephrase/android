@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class CalendarHelper private constructor() {
-
     companion object {
         fun parse(str: String, format: String): Calendar? {
             try {

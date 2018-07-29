@@ -4,7 +4,6 @@ import com.google.gson.Gson
 import kotlin.reflect.KClass
 
 class JsonHelper private constructor() {
-
     companion object {
         fun serialize(obj: Any): String {
             val gson = Gson()

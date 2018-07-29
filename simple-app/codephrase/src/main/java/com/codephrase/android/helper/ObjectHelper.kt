@@ -3,7 +3,6 @@ package com.codephrase.android.helper
 import kotlin.reflect.KClass
 
 class ObjectHelper private constructor() {
-
     companion object {
         fun <T : Any> create(type: KClass<T>): T? {
             try {

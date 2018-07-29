@@ -9,7 +9,6 @@ import com.codephrase.android.app.Application
 import java.util.*
 
 class ApplicationHelper private constructor() {
-
     companion object {
         fun getContext(): Context {
             return Application.instance

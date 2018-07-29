@@ -1,7 +1,6 @@
 package com.codephrase.android.app
 
 abstract class Application : android.app.Application() {
-
     open val connectTimeout: Int
         get() = 0
 

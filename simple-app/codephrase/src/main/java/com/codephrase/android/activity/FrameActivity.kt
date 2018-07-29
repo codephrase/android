@@ -1,28 +1,29 @@
 package com.codephrase.android.activity
 
 import android.app.Activity
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import com.codephrase.android.R
-import com.codephrase.android.exception.NotSupportedException
+import com.codephrase.android.error.NotImplementedError
+import com.codephrase.android.error.NotSupportedError
+import com.codephrase.android.viewmodel.ViewModel
 import kotlin.reflect.KClass
 
 abstract class FrameActivity : AppCompatActivity() {
-
-    open val toolbarEnabled: Boolean
+    protected open val toolbarEnabled: Boolean
         get() = false
 
-    open val upButtonEnabled: Boolean
+    protected open val upButtonEnabled: Boolean
         get() = false
 
-    open val layoutId: Int
+    protected open val layoutId: Int
         get() {
             if (toolbarEnabled)
                 return R.layout.activity_frame_toolbar
@@ -30,19 +31,39 @@ abstract class FrameActivity : AppCompatActivity() {
                 return R.layout.activity_frame_default
         }
 
-    open val contentPlaceholderId: Int
+    protected open val contentPlaceholderId: Int
+        get() = R.id.content_layout
+
+    protected open val contentLayoutId: Int
         get() = 0
 
-    open val contentLayoutId: Int
-        get() = 0
-
-    open val toolbarId: Int
+    protected open val toolbarId: Int
         get() = R.id.toolbar
 
-    open val menuId : Int
+    protected open val menuId: Int
         get() = 0
 
+    protected open val swipeRefreshLayoutId: Int
+        get() = 0
+
+    protected open val viewModelType: KClass<out ViewModel>
+        get() = throw NotImplementedError()
+
+    protected lateinit var viewModel: ViewModel
+
+    private var swipeRefreshLayout: SwipeRefreshLayout? = null
+
+    init {
+        initialize()
+    }
+
+    open fun initialize() {
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        viewModel = ViewModelProviders.of(this).get(viewModelType.java);
+
         super.onCreate(savedInstanceState)
 
         val root = findViewById<ViewGroup>(android.R.id.content)
@@ -54,7 +75,7 @@ abstract class FrameActivity : AppCompatActivity() {
         onViewInitialized(savedInstanceState)
     }
 
-    open fun initializeView(layoutInflater: LayoutInflater, root: ViewGroup?, savedInstanceState: Bundle?): View? {
+    protected open fun initializeView(layoutInflater: LayoutInflater, root: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (layoutId > 0) {
             val view = layoutInflater.inflate(layoutId, root, false);
             if (view != null) {
@@ -77,11 +98,23 @@ abstract class FrameActivity : AppCompatActivity() {
         return null
     }
 
-    open fun initializeContentView(layoutInflater: LayoutInflater, contentPlaceholder: ViewGroup?, savedInstanceState: Bundle?): View? {
+    protected open fun initializeContentView(layoutInflater: LayoutInflater, contentPlaceholder: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (contentLayoutId > 0) {
             val contentView = layoutInflater.inflate(layoutId, contentPlaceholder, false);
-
-
+            if (contentView != null) {
+                if (swipeRefreshLayoutId > 0) {
+                    swipeRefreshLayout = contentView.findViewById(swipeRefreshLayoutId)
+                    swipeRefreshLayout?.let {
+                        it.setOnRefreshListener {
+                            if (canLoadData()) {
+                                loadData()
+                            } else {
+                                it.isRefreshing = false
+                            }
+                        }
+                    }
+                }
+            }
 
             return contentView
         }
@@ -89,7 +122,7 @@ abstract class FrameActivity : AppCompatActivity() {
         return null
     }
 
-    open fun onViewInitialized(savedInstanceState: Bundle?) {
+    protected open fun onViewInitialized(savedInstanceState: Bundle?) {
         if (toolbarEnabled) {
             if (toolbarId > 0) {
                 val toolbar = findViewById<Toolbar>(toolbarId)
@@ -101,6 +134,25 @@ abstract class FrameActivity : AppCompatActivity() {
         }
 
         invalidateToolbarTitle()
+
+        viewModel.title.observe(this, Observer {
+            invalidateToolbarTitle()
+        })
+
+        viewModel.dataLoading.observe(this, Observer {
+            if (it != true) {
+                swipeRefreshLayout?.isRefreshing = false
+            }
+        })
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (viewModel.dataLoaded.value != true) {
+            if (canLoadData())
+                loadData()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -114,7 +166,18 @@ abstract class FrameActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    fun <T : Activity> navigate(type : KClass<T>) {
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        item?.let {
+            if (it.itemId == android.R.id.home) {
+                onBackPressed()
+                return true
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    protected fun <T : Activity> navigate(type: KClass<T>) {
         val intent = Intent(this, type.java)
 
 
@@ -127,24 +190,33 @@ abstract class FrameActivity : AppCompatActivity() {
     }
 
     internal fun invalidateToolbarTitle() {
-        var title: String? = null
+        var title = viewModel.title.value;
 
-        try {
-            val activityInfo = packageManager.getActivityInfo(componentName, PackageManager.GET_META_DATA)
-            title = activityInfo.loadLabel(packageManager).toString()
-        } catch (e: Exception) {
+        if (title == null) {
+            try {
+                val activityInfo = packageManager.getActivityInfo(componentName, PackageManager.GET_META_DATA)
+                title = activityInfo.loadLabel(packageManager).toString()
+            } catch (e: Exception) {
 
+            }
         }
 
-        if (title != null)
-            supportActionBar?.setTitle(title)
+        supportActionBar?.title = title
+    }
+
+    private fun canLoadData(): Boolean {
+        return viewModel.dataLoading.value != true
+    }
+
+    private fun loadData() {
+        viewModel.loadData()
     }
 
     final override fun setTitle(title: CharSequence?) {
-        throw NotSupportedException()
+        throw NotSupportedError()
     }
 
     final override fun setTitle(titleId: Int) {
-        throw NotSupportedException()
+        throw NotSupportedError()
     }
 }
