@@ -5,11 +5,14 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.databinding.DataBindingUtil
+import android.databinding.ViewDataBinding
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.*
+import com.codephrase.android.BR
 import com.codephrase.android.R
 import com.codephrase.android.error.NotImplementedError
 import com.codephrase.android.error.NotSupportedError
@@ -103,7 +106,12 @@ abstract class FrameActivity : AppCompatActivity() {
                     if (contentPlaceholder != null) {
                         val contentView = initializeContentView(layoutInflater, contentPlaceholder, savedInstanceState)
                         if (contentView != null) {
-
+                            val binding: ViewDataBinding? = DataBindingUtil.bind(contentView);
+                            binding?.let {
+                                it.setLifecycleOwner(this)
+                                it.setVariable(BR.viewModel, viewModel);
+                                it.executePendingBindings()
+                            }
 
                             contentPlaceholder.addView(contentView)
                         }

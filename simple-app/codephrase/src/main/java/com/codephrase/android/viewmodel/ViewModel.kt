@@ -8,17 +8,9 @@ import android.os.Looper
 abstract class ViewModel : ViewModel() {
     val title = MutableLiveData<String>()
 
-    internal val dataLoading = MutableLiveData<Boolean>()
+    val dataLoading = MutableLiveData<Boolean>()
 
     internal val dataLoaded = MutableLiveData<Boolean>()
-
-    init {
-        initialize()
-    }
-
-    protected open fun initialize() {
-
-    }
 
     internal fun loadData() {
         dataLoading.value = true
