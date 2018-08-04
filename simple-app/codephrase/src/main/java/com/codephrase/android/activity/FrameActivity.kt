@@ -25,20 +25,30 @@ abstract class FrameActivity : AppCompatActivity() {
 
     protected open val layoutId: Int
         get() {
-            if (toolbarEnabled)
-                return R.layout.activity_frame_toolbar
-            else
+            if (toolbarEnabled) {
+                if (headerLayoutId > 0)
+                    return R.layout.activity_frame_collapsing
+                else
+                    return R.layout.activity_frame_toolbar
+            } else {
                 return R.layout.activity_frame_default
+            }
         }
+
+    protected open val toolbarId: Int
+        get() = R.id.toolbar
+
+    protected open val headerPlaceholderId: Int
+        get() = R.id.header_layout
+
+    protected open val headerLayoutId: Int
+        get() = 0
 
     protected open val contentPlaceholderId: Int
         get() = R.id.content_layout
 
     protected open val contentLayoutId: Int
         get() = 0
-
-    protected open val toolbarId: Int
-        get() = R.id.toolbar
 
     protected open val menuId: Int
         get() = 0
@@ -62,13 +72,13 @@ abstract class FrameActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        viewModel = ViewModelProviders.of(this).get(viewModelType.java);
+        viewModel = ViewModelProviders.of(this).get(viewModelType.java)
 
         super.onCreate(savedInstanceState)
 
         val root = findViewById<ViewGroup>(android.R.id.content)
 
-        val view = initializeView(layoutInflater, root, savedInstanceState);
+        val view = initializeView(layoutInflater, root, savedInstanceState)
         if (view != null)
             setContentView(view)
 
@@ -77,10 +87,19 @@ abstract class FrameActivity : AppCompatActivity() {
 
     protected open fun initializeView(layoutInflater: LayoutInflater, root: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (layoutId > 0) {
-            val view = layoutInflater.inflate(layoutId, root, false);
+            val view = layoutInflater.inflate(layoutId, root, false)
             if (view != null) {
+                if (headerPlaceholderId > 0) {
+                    val headerPlaceholder = view.findViewById<ViewGroup>(headerPlaceholderId)
+                    if (headerPlaceholder != null) {
+                        val headerView = initializeHeaderView(layoutInflater, headerPlaceholder, savedInstanceState)
+                        if (headerView != null)
+                            headerPlaceholder.addView(headerView)
+                    }
+                }
+
                 if (contentPlaceholderId > 0) {
-                    val contentPlaceholder = view.findViewById<ViewGroup>(contentPlaceholderId);
+                    val contentPlaceholder = view.findViewById<ViewGroup>(contentPlaceholderId)
                     if (contentPlaceholder != null) {
                         val contentView = initializeContentView(layoutInflater, contentPlaceholder, savedInstanceState)
                         if (contentView != null) {
@@ -98,9 +117,16 @@ abstract class FrameActivity : AppCompatActivity() {
         return null
     }
 
+    protected open fun initializeHeaderView(layoutInflater: LayoutInflater, headerPlaceholder: ViewGroup?, savedInstanceState: Bundle?): View? {
+        if (headerLayoutId > 0)
+            return layoutInflater.inflate(headerLayoutId, headerPlaceholder, false)
+        else
+            return null
+    }
+
     protected open fun initializeContentView(layoutInflater: LayoutInflater, contentPlaceholder: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (contentLayoutId > 0) {
-            val contentView = layoutInflater.inflate(layoutId, contentPlaceholder, false);
+            val contentView = layoutInflater.inflate(contentLayoutId, contentPlaceholder, false)
             if (contentView != null) {
                 if (swipeRefreshLayoutId > 0) {
                     swipeRefreshLayout = contentView.findViewById(swipeRefreshLayoutId)
@@ -190,7 +216,7 @@ abstract class FrameActivity : AppCompatActivity() {
     }
 
     internal fun invalidateToolbarTitle() {
-        var title = viewModel.title.value;
+        var title = viewModel.title.value
 
         if (title == null) {
             try {

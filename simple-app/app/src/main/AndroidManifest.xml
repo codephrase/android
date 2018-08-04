@@ -22,6 +22,12 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".activity.FullscreenPageActivity" />
+
+        <activity android:name=".activity.ToolbarPageActivity" />
+
+        <activity android:name=".activity.CollapsingPageActivity" />
+
         <activity android:name=".activity.MainActivity" />
 
     </application>
