@@ -11,5 +11,5 @@ class LauncherActivity : StartActivity() {
         get() = LauncherViewModel::class
 
     override val navigationTargetType: KClass<out FrameActivity>
-        get() = DataBindingActivity::class
+        get() = FragmentPageActivity::class
 }

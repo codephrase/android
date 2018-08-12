@@ -1,27 +1,26 @@
-package com.codephrase.android.activity
+package com.codephrase.android.fragment
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.databinding.DataBindingUtil
 import android.databinding.ViewDataBinding
 import android.os.Bundle
+import android.support.annotation.IdRes
+import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
+import android.support.v7.app.ActionBar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.*
 import com.codephrase.android.BR
 import com.codephrase.android.R
+import com.codephrase.android.activity.FrameActivity
 import com.codephrase.android.error.NotImplementedError
-import com.codephrase.android.error.NotSupportedError
-import com.codephrase.android.fragment.FrameFragment
-import com.codephrase.android.helper.ObjectHelper
 import com.codephrase.android.viewmodel.ViewModel
-import com.codephrase.android.viewstate.FrameActivityState
+import com.codephrase.android.viewstate.FrameFragmentState
 import kotlin.reflect.KClass
 
-abstract class FrameActivity : AppCompatActivity() {
+abstract class FrameFragment : Fragment() {
     protected open val toolbarEnabled: Boolean
         get() = false
 
@@ -32,11 +31,11 @@ abstract class FrameActivity : AppCompatActivity() {
         get() {
             if (toolbarEnabled) {
                 if (headerLayoutId > 0)
-                    return R.layout.activity_frame_collapsing
+                    return R.layout.fragment_frame_collapsing
                 else
-                    return R.layout.activity_frame_toolbar
+                    return R.layout.fragment_frame_toolbar
             } else {
-                return R.layout.activity_frame_default
+                return R.layout.fragment_frame_default
             }
         }
 
@@ -55,27 +54,28 @@ abstract class FrameActivity : AppCompatActivity() {
     protected open val contentLayoutId: Int
         get() = 0
 
-    protected open val contentFragmentType: KClass<out FrameFragment>?
-        get() = null
-
     protected open val menuId: Int
         get() = 0
 
     protected open val swipeRefreshLayoutId: Int
         get() = 0
 
-    protected open val viewStateType: KClass<out FrameActivityState>
-        get() = FrameActivityState::class
+    protected open val viewStateType: KClass<out FrameFragmentState>
+        get() = FrameFragmentState::class
 
     protected open val viewModelType: KClass<out ViewModel>
         get() = throw NotImplementedError()
 
+    val supportActionBar: ActionBar?
+        get() {
+            val activity = activity as AppCompatActivity?
+            return activity?.supportActionBar
+        }
+
     private var swipeRefreshLayout: SwipeRefreshLayout? = null
 
-    protected lateinit var viewState: FrameActivityState
+    protected lateinit var viewState: FrameFragmentState
     protected lateinit var viewModel: ViewModel
-
-    private var internalBackStackModification: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,11 +83,20 @@ abstract class FrameActivity : AppCompatActivity() {
         viewState = ViewModelProviders.of(this).get(viewStateType.java)
         viewModel = ViewModelProviders.of(this).get(viewModelType.java)
 
-        val container = findViewById<ViewGroup>(android.R.id.content)
+        if (toolbarEnabled)
+            setHasOptionsMenu(true)
+    }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = initializeView(layoutInflater, container, savedInstanceState)
         if (view != null)
-            setContentView(view)
+            return view;
+
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         onViewInitialized(savedInstanceState)
     }
@@ -105,21 +114,19 @@ abstract class FrameActivity : AppCompatActivity() {
                     }
                 }
 
-                if (contentFragmentType == null) {
-                    if (contentContainerId > 0) {
-                        val contentContainer = view.findViewById<ViewGroup>(contentContainerId)
-                        if (contentContainer != null) {
-                            val contentView = initializeContentView(layoutInflater, contentContainer, savedInstanceState)
-                            if (contentView != null) {
-                                val binding: ViewDataBinding? = DataBindingUtil.bind(contentView);
-                                binding?.let {
-                                    it.setLifecycleOwner(this)
-                                    it.setVariable(BR.viewModel, viewModel);
-                                    it.executePendingBindings()
-                                }
-
-                                contentContainer.addView(contentView)
+                if (contentContainerId > 0) {
+                    val contentContainer = view.findViewById<ViewGroup>(contentContainerId)
+                    if (contentContainer != null) {
+                        val contentView = initializeContentView(layoutInflater, contentContainer, savedInstanceState)
+                        if (contentView != null) {
+                            val binding: ViewDataBinding? = DataBindingUtil.bind(contentView);
+                            binding?.let {
+                                it.setLifecycleOwner(this)
+                                it.setVariable(BR.viewModel, viewModel);
+                                it.executePendingBindings()
                             }
+
+                            contentContainer.addView(contentView)
                         }
                     }
                 }
@@ -163,19 +170,16 @@ abstract class FrameActivity : AppCompatActivity() {
             if (toolbarId > 0) {
                 val toolbar = findViewById<Toolbar>(toolbarId)
                 if (toolbar != null) {
-                    setSupportActionBar(toolbar)
-                    updateToolbarState(upButtonEnabled)
+                    val activity = activity as FrameActivity?
+                    activity?.let {
+                        it.setSupportActionBar(toolbar)
+                        it.updateToolbarState(upButtonEnabled)
+                    }
                 }
             }
         }
 
         invalidateToolbarTitle()
-
-        if (savedInstanceState == null) {
-            contentFragmentType?.let {
-                navigateFragment(it, false);
-            }
-        }
 
         viewModel.title.observe(this, Observer {
             invalidateToolbarTitle()
@@ -193,91 +197,42 @@ abstract class FrameActivity : AppCompatActivity() {
             viewModel.loadData()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         if (toolbarEnabled) {
-            if (menuId > 0) {
-                menuInflater.inflate(menuId, menu)
-                return true
-            }
+            if (menuId > 0)
+                inflater?.inflate(menuId, menu)
         }
 
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        item?.let {
-            if (it.itemId == android.R.id.home) {
-                onBackPressed()
-                return true
-            }
-        }
-
-        return super.onOptionsItemSelected(item)
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
     public fun navigate(type: KClass<out FrameActivity>) {
-        val intent = Intent(this, type.java)
-        startActivity(intent)
+        val activity = activity as FrameActivity?
+        activity?.navigate(type)
     }
 
     public fun navigateFragment(type: KClass<out FrameFragment>) {
-        navigateFragment(type, true)
+        val activity = activity as FrameActivity?
+        activity?.navigateFragment(type)
     }
 
     public fun navigateFragment(type: KClass<out FrameFragment>, addToBackStack: Boolean) {
-        navigateFragment(contentContainerId, type, addToBackStack)
+        val activity = activity as FrameActivity?
+        activity?.navigateFragment(type, addToBackStack)
     }
 
-    private fun navigateFragment(contentContainerId: Int, type: KClass<out FrameFragment>, addToBackStack: Boolean) {
-        if (contentContainerId > 0) {
-            val fragment = ObjectHelper.create(type)
-            val contentContainer = findViewById<ViewGroup>(contentContainerId)
-
-            if (fragment != null && contentContainer != null) {
-                internalBackStackModification = true
-
-                val fragmentTransaction = supportFragmentManager.beginTransaction()
-                fragmentTransaction.replace(contentContainerId, fragment)
-
-                if (addToBackStack) {
-                    fragmentTransaction.addToBackStack(type.qualifiedName)
-
-                    val currentFragmentType = viewState.currentFragmentType;
-                    if (currentFragmentType != null)
-                        viewState.navigationStack.push(currentFragmentType)
-                }
-
-                viewState.currentFragmentType = type
-
-                fragmentTransaction.commit()
-            }
-        }
-    }
-
-    internal fun updateToolbarState(upButtonEnabled: Boolean) {
-        supportActionBar?.setDisplayHomeAsUpEnabled(upButtonEnabled)
+    fun <T : View> findViewById(@IdRes id: Int): T? {
+        return view?.findViewById(id)
     }
 
     internal fun invalidateToolbarTitle() {
         var title = viewModel.title.value
 
-        if (title == null) {
-            try {
-                val activityInfo = packageManager.getActivityInfo(componentName, PackageManager.GET_META_DATA)
-                title = activityInfo.loadLabel(packageManager).toString()
-            } catch (e: Exception) {
-
-            }
+        if (title != null) {
+            supportActionBar?.title = title
+        } else {
+            val activity = activity as FrameActivity?
+            activity?.invalidateToolbarTitle()
         }
-
-        supportActionBar?.title = title
-    }
-
-    final override fun setTitle(title: CharSequence?) {
-        throw NotSupportedError()
-    }
-
-    final override fun setTitle(titleId: Int) {
-        throw NotSupportedError()
     }
 }

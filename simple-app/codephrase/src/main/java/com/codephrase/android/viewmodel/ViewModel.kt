@@ -13,11 +13,17 @@ abstract class ViewModel : ViewModel() {
     internal val dataLoaded = MutableLiveData<Boolean>()
 
     internal fun loadData() {
-        dataLoading.value = true
+        if (canLoadData()) {
+            dataLoading.value = true
 
-        runOnBackgroundThread(Runnable {
-            onDataLoading()
-        })
+            runOnBackgroundThread(Runnable {
+                onDataLoading()
+            })
+        }
+    }
+
+    protected open fun canLoadData(): Boolean {
+        return dataLoading.value != true
     }
 
     protected open fun onDataLoading() {
@@ -31,12 +37,12 @@ abstract class ViewModel : ViewModel() {
         })
     }
 
-    private fun runOnBackgroundThread(action : Runnable) {
+    private fun runOnBackgroundThread(action: Runnable) {
         val thread = Thread(action)
         thread.start()
     }
 
-    private fun runOnUIThread(action : Runnable) {
+    private fun runOnUIThread(action: Runnable) {
         val handler = Handler(Looper.getMainLooper())
         handler.post(action)
     }
