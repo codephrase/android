@@ -34,16 +34,12 @@ class ApplicationHelper private constructor() {
             return getContext().resources
         }
 
-        fun isApiLevel15Supported(): Boolean {
-            return isApiSupported(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+        fun getHardwareId(): String {
+            return Application.instance.hardwareId
         }
 
-        fun isApiLevel16Supported(): Boolean {
-            return isApiSupported(Build.VERSION_CODES.JELLY_BEAN)
-        }
-
-        fun isApiLevel17Supported(): Boolean {
-            return isApiSupported(Build.VERSION_CODES.JELLY_BEAN_MR1)
+        fun getSoftwareId(): String {
+            return Application.instance.softwareId
         }
 
         fun isApiLevel18Supported(): Boolean {
