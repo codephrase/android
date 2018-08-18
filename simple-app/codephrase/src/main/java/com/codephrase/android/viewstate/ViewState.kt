@@ -3,6 +3,7 @@ package com.codephrase.android.viewstate
 import android.os.Parcel
 import android.os.Parcelable
 
+@Suppress("UNUSED_PARAMETER")
 abstract class ViewState : Parcelable {
     constructor() {
 

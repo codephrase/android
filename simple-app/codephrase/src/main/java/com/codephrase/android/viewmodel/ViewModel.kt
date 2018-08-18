@@ -7,10 +7,16 @@ import android.os.Looper
 
 abstract class ViewModel : ViewModel() {
     val title = MutableLiveData<String>()
-
     val dataLoading = MutableLiveData<Boolean>()
-
     internal val dataLoaded = MutableLiveData<Boolean>()
+
+    internal fun onNavigatedInternal(data: Any?) {
+        onNavigated(data)
+    }
+
+    protected open fun onNavigated(data: Any?) {
+
+    }
 
     internal fun loadData() {
         if (canLoadData()) {

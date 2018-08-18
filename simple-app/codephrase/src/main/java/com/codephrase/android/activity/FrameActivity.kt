@@ -13,9 +13,11 @@ import android.support.v7.widget.Toolbar
 import android.view.*
 import com.codephrase.android.BR
 import com.codephrase.android.R
+import com.codephrase.android.constant.NavigationConstants
 import com.codephrase.android.error.NotImplementedError
 import com.codephrase.android.error.NotSupportedError
 import com.codephrase.android.fragment.FrameFragment
+import com.codephrase.android.helper.JsonHelper
 import com.codephrase.android.helper.ObjectHelper
 import com.codephrase.android.viewmodel.ViewModel
 import com.codephrase.android.viewstate.FrameActivityState
@@ -80,6 +82,24 @@ abstract class FrameActivity : AppCompatActivity() {
         viewState = savedInstanceState?.getParcelable("view-state") ?: onCreateViewState()
         viewModel = ViewModelProviders.of(this).get(viewModelType.java)
 
+        var sender: KClass<*> = this::class
+        var data: Any? = null
+
+        intent.extras?.let {
+            if (it.containsKey(NavigationConstants.SENDER))
+                sender = (it.getSerializable(NavigationConstants.SENDER) as Class<*>).kotlin
+
+            if (it.containsKey(NavigationConstants.DATA_TYPE) && it.containsKey(NavigationConstants.DATA_OBJECT)) {
+                val type = (it.getSerializable(NavigationConstants.DATA_TYPE) as Class<*>).kotlin
+                val str = it.getString(NavigationConstants.DATA_OBJECT)
+
+                if (!str.isNullOrEmpty())
+                    data = JsonHelper.deserialize(str, type)
+            }
+        }
+
+        onNavigated(sender, data)
+
         val container = findViewById<ViewGroup>(android.R.id.content)
 
         val view = initializeView(layoutInflater, container, savedInstanceState)
@@ -107,8 +127,8 @@ abstract class FrameActivity : AppCompatActivity() {
                         val contentContainer = view.findViewById<ViewGroup>(contentContainerId)
                         if (contentContainer != null) {
                             val contentView = initializeContentView(layoutInflater, contentContainer, savedInstanceState)
-                            if (contentView != null) {
-                                val binding: ViewDataBinding? = DataBindingUtil.bind(contentView)
+                            contentView?.let {
+                                val binding: ViewDataBinding? = DataBindingUtil.bind(it)
                                 binding?.let {
                                     it.setLifecycleOwner(this)
                                     it.setVariable(BR.viewModel, viewModel)
@@ -194,10 +214,10 @@ abstract class FrameActivity : AppCompatActivity() {
         return FrameActivityState()
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState?.putParcelable("view-state", viewState)
+        outState.putParcelable("view-state", viewState)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -222,8 +242,23 @@ abstract class FrameActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    protected open fun onNavigated(sender: KClass<*>, data: Any?) {
+        viewModel.onNavigatedInternal(data)
+    }
+
     fun navigate(type: KClass<out FrameActivity>) {
+        navigate(type, null)
+    }
+
+    fun navigate(type: KClass<out FrameActivity>, data: Any?) {
         val intent = Intent(this, type.java)
+        intent.putExtra(NavigationConstants.SENDER, javaClass);
+
+        data?.let {
+            intent.putExtra(NavigationConstants.DATA_TYPE, it.javaClass)
+            intent.putExtra(NavigationConstants.DATA_OBJECT, JsonHelper.serialize(it))
+        }
+
         startActivity(intent)
     }
 
@@ -231,20 +266,36 @@ abstract class FrameActivity : AppCompatActivity() {
         navigateFragment(type, true)
     }
 
-    fun navigateFragment(type: KClass<out FrameFragment>, addToBackStack: Boolean) {
-        navigateFragment(contentContainerId, type, addToBackStack)
+    fun navigateFragment(type: KClass<out FrameFragment>, data: Any?) {
+        navigateFragment(type, data, true)
     }
 
-    private fun navigateFragment(contentContainerId: Int, type: KClass<out FrameFragment>, addToBackStack: Boolean) {
+    fun navigateFragment(type: KClass<out FrameFragment>, addToBackStack: Boolean) {
+        navigateFragment(type, null, addToBackStack)
+    }
+
+    fun navigateFragment(type: KClass<out FrameFragment>, data: Any?, addToBackStack: Boolean) {
+        navigateFragment(contentContainerId, type, data, addToBackStack)
+    }
+
+    private fun navigateFragment(contentContainerId: Int, type: KClass<out FrameFragment>, data: Any?, addToBackStack: Boolean) {
         if (contentContainerId > 0) {
             val fragment = ObjectHelper.create(type)
-            val contentContainer = findViewById<ViewGroup>(contentContainerId)
-
-            if (fragment != null && contentContainer != null) {
+            fragment?.let {
                 internalBackStackModification = true
 
+                val arguments = Bundle()
+                arguments.putSerializable(NavigationConstants.SENDER, javaClass);
+
+                data?.let {
+                    arguments.putSerializable(NavigationConstants.DATA_TYPE, it.javaClass)
+                    arguments.putString(NavigationConstants.DATA_OBJECT, JsonHelper.serialize(it))
+                }
+
+                it.arguments = arguments
+
                 val fragmentTransaction = supportFragmentManager.beginTransaction()
-                fragmentTransaction.replace(contentContainerId, fragment)
+                fragmentTransaction.replace(contentContainerId, it)
 
                 if (addToBackStack) {
                     fragmentTransaction.addToBackStack(type.qualifiedName)

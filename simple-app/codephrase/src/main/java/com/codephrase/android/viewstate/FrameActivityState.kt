@@ -8,6 +8,7 @@ import com.codephrase.android.extension.writeNullable
 import java.util.*
 import kotlin.reflect.KClass
 
+@Suppress("UNCHECKED_CAST")
 open class FrameActivityState : ViewState {
     var currentFragmentType: KClass<out Fragment>? = null
     var navigationStack = Stack<KClass<out Fragment>>()

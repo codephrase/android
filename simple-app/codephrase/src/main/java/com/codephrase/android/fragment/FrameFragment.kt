@@ -15,7 +15,9 @@ import android.view.*
 import com.codephrase.android.BR
 import com.codephrase.android.R
 import com.codephrase.android.activity.FrameActivity
+import com.codephrase.android.constant.NavigationConstants
 import com.codephrase.android.error.NotImplementedError
+import com.codephrase.android.helper.JsonHelper
 import com.codephrase.android.viewmodel.ViewModel
 import com.codephrase.android.viewstate.FrameFragmentState
 import kotlin.reflect.KClass
@@ -80,6 +82,24 @@ abstract class FrameFragment : Fragment() {
         viewState = savedInstanceState?.getParcelable("view-state") ?: onCreateViewState()
         viewModel = ViewModelProviders.of(this).get(viewModelType.java)
 
+        var sender: KClass<*> = this::class
+        var data: Any? = null
+
+        arguments?.let {
+            if (it.containsKey(NavigationConstants.SENDER))
+                sender = (it.getSerializable(NavigationConstants.SENDER) as Class<*>).kotlin
+
+            if (it.containsKey(NavigationConstants.DATA_TYPE) && it.containsKey(NavigationConstants.DATA_OBJECT)) {
+                val type = (it.getSerializable(NavigationConstants.DATA_TYPE) as Class<*>).kotlin
+                val str = it.getString(NavigationConstants.DATA_OBJECT)
+
+                if (!str.isNullOrEmpty())
+                    data = JsonHelper.deserialize(str, type)
+            }
+        }
+
+        onNavigated(sender, data)
+
         if (toolbarEnabled)
             setHasOptionsMenu(true)
     }
@@ -115,8 +135,8 @@ abstract class FrameFragment : Fragment() {
                     val contentContainer = view.findViewById<ViewGroup>(contentContainerId)
                     if (contentContainer != null) {
                         val contentView = initializeContentView(layoutInflater, contentContainer, savedInstanceState)
-                        if (contentView != null) {
-                            val binding: ViewDataBinding? = DataBindingUtil.bind(contentView)
+                        contentView?.let {
+                            val binding: ViewDataBinding? = DataBindingUtil.bind(it)
                             binding?.let {
                                 it.setLifecycleOwner(this)
                                 it.setVariable(BR.viewModel, viewModel)
@@ -194,14 +214,14 @@ abstract class FrameFragment : Fragment() {
             viewModel.loadData()
     }
 
-    protected open fun onCreateViewState() : FrameFragmentState {
+    protected open fun onCreateViewState(): FrameFragmentState {
         return FrameFragmentState()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState?.putParcelable("view-state", viewState)
+        outState.putParcelable("view-state", viewState)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -211,6 +231,10 @@ abstract class FrameFragment : Fragment() {
         }
 
         super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    protected open fun onNavigated(sender: KClass<*>, data: Any?) {
+        viewModel.onNavigatedInternal(data)
     }
 
     fun navigate(type: KClass<out FrameActivity>) {
