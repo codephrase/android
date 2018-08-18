@@ -27,7 +27,7 @@ class ApplicationHelper private constructor() {
         }
 
         fun getConfiguration(): Configuration {
-            return getResources().configuration;
+            return getResources().configuration
         }
 
         fun getResources(): Resources {

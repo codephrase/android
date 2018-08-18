@@ -8,7 +8,7 @@ abstract class Application : android.app.Application() {
     private val SOFTWARE_ID = "software-id"
 
     internal val hardwareId: String by lazy {
-        Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: ""
     }
 
     internal val softwareId: String by lazy {

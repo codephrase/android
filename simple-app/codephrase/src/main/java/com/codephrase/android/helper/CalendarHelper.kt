@@ -10,7 +10,7 @@ class CalendarHelper private constructor() {
                 val dateFormat = SimpleDateFormat(format)
 
                 val calendar = Calendar.getInstance()
-                calendar.time = dateFormat.parse(str);
+                calendar.time = dateFormat.parse(str)
                 return calendar
             } catch (e: Exception) {
                 return null

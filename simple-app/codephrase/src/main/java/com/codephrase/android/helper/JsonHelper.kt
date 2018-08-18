@@ -12,7 +12,7 @@ class JsonHelper private constructor() {
 
         fun <T : Any> deserialize(str: String, type: KClass<T>): T {
             val gson = Gson()
-            return gson.fromJson(str, type.java);
+            return gson.fromJson(str, type.java)
         }
     }
 }

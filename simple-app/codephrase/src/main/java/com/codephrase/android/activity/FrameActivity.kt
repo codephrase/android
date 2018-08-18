@@ -64,9 +64,6 @@ abstract class FrameActivity : AppCompatActivity() {
     protected open val swipeRefreshLayoutId: Int
         get() = 0
 
-    protected open val viewStateType: KClass<out FrameActivityState>
-        get() = FrameActivityState::class
-
     protected open val viewModelType: KClass<out ViewModel>
         get() = throw NotImplementedError()
 
@@ -80,7 +77,7 @@ abstract class FrameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewState = ViewModelProviders.of(this).get(viewStateType.java)
+        viewState = savedInstanceState?.getParcelable("view-state") ?: onCreateViewState()
         viewModel = ViewModelProviders.of(this).get(viewModelType.java)
 
         val container = findViewById<ViewGroup>(android.R.id.content)
@@ -111,10 +108,10 @@ abstract class FrameActivity : AppCompatActivity() {
                         if (contentContainer != null) {
                             val contentView = initializeContentView(layoutInflater, contentContainer, savedInstanceState)
                             if (contentView != null) {
-                                val binding: ViewDataBinding? = DataBindingUtil.bind(contentView);
+                                val binding: ViewDataBinding? = DataBindingUtil.bind(contentView)
                                 binding?.let {
                                     it.setLifecycleOwner(this)
-                                    it.setVariable(BR.viewModel, viewModel);
+                                    it.setVariable(BR.viewModel, viewModel)
                                     it.executePendingBindings()
                                 }
 
@@ -173,7 +170,7 @@ abstract class FrameActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             contentFragmentType?.let {
-                navigateFragment(it, false);
+                navigateFragment(it, false)
             }
         }
 
@@ -191,6 +188,16 @@ abstract class FrameActivity : AppCompatActivity() {
 
         if (viewModel.dataLoaded.value != true)
             viewModel.loadData()
+    }
+
+    protected open fun onCreateViewState(): FrameActivityState {
+        return FrameActivityState()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+
+        outState?.putParcelable("view-state", viewState)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -215,16 +222,16 @@ abstract class FrameActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    public fun navigate(type: KClass<out FrameActivity>) {
+    fun navigate(type: KClass<out FrameActivity>) {
         val intent = Intent(this, type.java)
         startActivity(intent)
     }
 
-    public fun navigateFragment(type: KClass<out FrameFragment>) {
+    fun navigateFragment(type: KClass<out FrameFragment>) {
         navigateFragment(type, true)
     }
 
-    public fun navigateFragment(type: KClass<out FrameFragment>, addToBackStack: Boolean) {
+    fun navigateFragment(type: KClass<out FrameFragment>, addToBackStack: Boolean) {
         navigateFragment(contentContainerId, type, addToBackStack)
     }
 
@@ -242,7 +249,7 @@ abstract class FrameActivity : AppCompatActivity() {
                 if (addToBackStack) {
                     fragmentTransaction.addToBackStack(type.qualifiedName)
 
-                    val currentFragmentType = viewState.currentFragmentType;
+                    val currentFragmentType = viewState.currentFragmentType
                     if (currentFragmentType != null)
                         viewState.navigationStack.push(currentFragmentType)
                 }

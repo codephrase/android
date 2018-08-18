@@ -22,7 +22,7 @@ class SecureKeyWrapper(private val context: Context) {
     private val KEY_SIZE = 2048
 
     private val ALGORITHM = KeyProperties.KEY_ALGORITHM_RSA
-    private val BLOCK_MODE = KeyProperties.BLOCK_MODE_ECB;
+    private val BLOCK_MODE = KeyProperties.BLOCK_MODE_ECB
     private val ENCRYPTION_PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
     private val RSA_CIPHER = ALGORITHM + "/" + BLOCK_MODE + "/" + ENCRYPTION_PADDING
 
@@ -123,8 +123,8 @@ class SecureKeyWrapper(private val context: Context) {
     }
 
     fun wrap(key: SecretKey): ByteArray {
-        cipher.init(Cipher.WRAP_MODE, keyPair.public);
-        return cipher.wrap(key);
+        cipher.init(Cipher.WRAP_MODE, keyPair.public)
+        return cipher.wrap(key)
     }
 
     fun unwrap(blob: ByteArray): SecretKey {

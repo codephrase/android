@@ -60,9 +60,6 @@ abstract class FrameFragment : Fragment() {
     protected open val swipeRefreshLayoutId: Int
         get() = 0
 
-    protected open val viewStateType: KClass<out FrameFragmentState>
-        get() = FrameFragmentState::class
-
     protected open val viewModelType: KClass<out ViewModel>
         get() = throw NotImplementedError()
 
@@ -80,7 +77,7 @@ abstract class FrameFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewState = ViewModelProviders.of(this).get(viewStateType.java)
+        viewState = savedInstanceState?.getParcelable("view-state") ?: onCreateViewState()
         viewModel = ViewModelProviders.of(this).get(viewModelType.java)
 
         if (toolbarEnabled)
@@ -90,7 +87,7 @@ abstract class FrameFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = initializeView(layoutInflater, container, savedInstanceState)
         if (view != null)
-            return view;
+            return view
 
         return super.onCreateView(inflater, container, savedInstanceState)
     }
@@ -119,10 +116,10 @@ abstract class FrameFragment : Fragment() {
                     if (contentContainer != null) {
                         val contentView = initializeContentView(layoutInflater, contentContainer, savedInstanceState)
                         if (contentView != null) {
-                            val binding: ViewDataBinding? = DataBindingUtil.bind(contentView);
+                            val binding: ViewDataBinding? = DataBindingUtil.bind(contentView)
                             binding?.let {
                                 it.setLifecycleOwner(this)
-                                it.setVariable(BR.viewModel, viewModel);
+                                it.setVariable(BR.viewModel, viewModel)
                                 it.executePendingBindings()
                             }
 
@@ -197,6 +194,16 @@ abstract class FrameFragment : Fragment() {
             viewModel.loadData()
     }
 
+    protected open fun onCreateViewState() : FrameFragmentState {
+        return FrameFragmentState()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState?.putParcelable("view-state", viewState)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         if (toolbarEnabled) {
             if (menuId > 0)
@@ -206,17 +213,17 @@ abstract class FrameFragment : Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    public fun navigate(type: KClass<out FrameActivity>) {
+    fun navigate(type: KClass<out FrameActivity>) {
         val activity = activity as FrameActivity?
         activity?.navigate(type)
     }
 
-    public fun navigateFragment(type: KClass<out FrameFragment>) {
+    fun navigateFragment(type: KClass<out FrameFragment>) {
         val activity = activity as FrameActivity?
         activity?.navigateFragment(type)
     }
 
-    public fun navigateFragment(type: KClass<out FrameFragment>, addToBackStack: Boolean) {
+    fun navigateFragment(type: KClass<out FrameFragment>, addToBackStack: Boolean) {
         val activity = activity as FrameActivity?
         activity?.navigateFragment(type, addToBackStack)
     }

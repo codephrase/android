@@ -20,7 +20,7 @@ class SecurityHelper private constructor() {
         }
 
         fun getEncryptionKey(): String {
-            val context = ApplicationHelper.getContext();
+            val context = ApplicationHelper.getContext()
             val file = File(context.filesDir, context.packageName)
             val wrapper = SecureKeyWrapper(context)
 
@@ -51,7 +51,7 @@ class SecurityHelper private constructor() {
             val cipher = Cipher.getInstance(AES_ALGORITHM)
             cipher.init(Cipher.ENCRYPT_MODE, generateSecretKey(key), generateIV())
             val cipherText = cipher.doFinal(str.toByteArray())
-            return Base64.encodeToString(cipherText, Base64.NO_WRAP);
+            return Base64.encodeToString(cipherText, Base64.NO_WRAP)
         }
 
         fun decrypt(str: String): String {
