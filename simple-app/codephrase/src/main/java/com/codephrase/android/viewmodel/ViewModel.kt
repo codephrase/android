@@ -22,9 +22,9 @@ abstract class ViewModel : ViewModel() {
         if (canLoadData()) {
             dataLoading.value = true
 
-            runOnBackgroundThread(Runnable {
+            runOnBackgroundThread {
                 onDataLoading()
-            })
+            }
         }
     }
 
@@ -37,18 +37,18 @@ abstract class ViewModel : ViewModel() {
     }
 
     protected fun onDataLoaded() {
-        runOnUIThread(Runnable {
+        runOnUIThread {
             dataLoaded.value = true
             dataLoading.value = false
-        })
+        }
     }
 
-    private fun runOnBackgroundThread(action: Runnable) {
+    private fun runOnBackgroundThread(action: () -> Unit) {
         val thread = Thread(action)
         thread.start()
     }
 
-    private fun runOnUIThread(action: Runnable) {
+    private fun runOnUIThread(action: () -> Unit) {
         val handler = Handler(Looper.getMainLooper())
         handler.post(action)
     }
