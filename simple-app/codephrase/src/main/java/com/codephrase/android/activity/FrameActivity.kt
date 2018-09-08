@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.databinding.DataBindingUtil
 import android.databinding.ViewDataBinding
 import android.os.Bundle
+import android.support.v4.app.FragmentManager
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -69,12 +70,13 @@ abstract class FrameActivity : AppCompatActivity() {
     protected open val viewModelType: KClass<out ViewModel>
         get() = throw NotImplementedError()
 
-    private var swipeRefreshLayout: SwipeRefreshLayout? = null
+    protected var toolbar: Toolbar? = null
+    protected var swipeRefreshLayout: SwipeRefreshLayout? = null
 
     protected lateinit var viewState: FrameActivityState
     protected lateinit var viewModel: ViewModel
 
-    private var internalBackStackModification: Boolean = false
+    internal var internalBackStackModification: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -178,7 +180,7 @@ abstract class FrameActivity : AppCompatActivity() {
     protected open fun onViewInitialized(savedInstanceState: Bundle?) {
         if (toolbarEnabled) {
             if (toolbarId > 0) {
-                val toolbar = findViewById<Toolbar>(toolbarId)
+                toolbar = findViewById(toolbarId)
                 if (toolbar != null) {
                     setSupportActionBar(toolbar)
                     updateToolbarState(upButtonEnabled)
@@ -203,11 +205,23 @@ abstract class FrameActivity : AppCompatActivity() {
         })
     }
 
+    private val backStackChangedListener = FragmentManager.OnBackStackChangedListener {
+        onBackStackChanged()
+    }
+
     override fun onResume() {
         super.onResume()
 
+        supportFragmentManager.addOnBackStackChangedListener(backStackChangedListener)
+
         if (viewModel.dataLoaded.value != true)
             viewModel.loadData()
+    }
+
+    override fun onPause() {
+        supportFragmentManager.removeOnBackStackChangedListener(backStackChangedListener)
+
+        super.onPause()
     }
 
     protected open fun onCreateViewState(): FrameActivityState {
@@ -244,6 +258,17 @@ abstract class FrameActivity : AppCompatActivity() {
 
     protected open fun onNavigated(sender: KClass<*>, data: Any?) {
         viewModel.onNavigatedInternal(data)
+    }
+
+    protected open fun onBackStackChanged() {
+        if (!internalBackStackModification) {
+            val navigationStack = viewState.navigationStack
+
+            if (navigationStack.size > 0)
+                navigationStack.pop()
+        } else {
+            internalBackStackModification = false
+        }
     }
 
     fun navigate(type: KClass<out FrameActivity>) {
@@ -312,7 +337,20 @@ abstract class FrameActivity : AppCompatActivity() {
         }
     }
 
-    internal fun updateToolbarState(upButtonEnabled: Boolean) {
+    internal fun clearNavigationStack() {
+        val navigationStack = viewState.navigationStack
+        val count = navigationStack.size
+
+        for (i in 0 until count) {
+            internalBackStackModification = true
+
+            supportFragmentManager.popBackStackImmediate()
+        }
+
+        navigationStack.clear()
+    }
+
+    internal open fun updateToolbarState(upButtonEnabled: Boolean) {
         supportActionBar?.setDisplayHomeAsUpEnabled(upButtonEnabled)
     }
 

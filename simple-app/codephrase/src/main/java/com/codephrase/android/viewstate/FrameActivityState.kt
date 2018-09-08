@@ -34,10 +34,6 @@ open class FrameActivityState : ViewState {
         parcel.writeSerializable(stack)
     }
 
-    override fun describeContents(): Int {
-        return 0
-    }
-
     companion object CREATOR : Parcelable.Creator<FrameActivityState> {
         override fun createFromParcel(parcel: Parcel): FrameActivityState {
             return FrameActivityState(parcel)

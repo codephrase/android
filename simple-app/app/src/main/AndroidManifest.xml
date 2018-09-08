@@ -32,7 +32,7 @@
 
         <activity android:name=".activity.DataBindingActivity" />
 
-        <activity android:name=".activity.MainActivity" />
+        <activity android:name=".activity.ToolbarDrawerActivity" />
 
     </application>
 
