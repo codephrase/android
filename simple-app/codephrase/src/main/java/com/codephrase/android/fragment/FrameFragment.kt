@@ -85,13 +85,13 @@ abstract class FrameFragment : Fragment() {
         var sender: KClass<*> = this::class
         var data: Any? = null
 
-        arguments?.let {
-            if (it.containsKey(NavigationConstants.SENDER))
-                sender = (it.getSerializable(NavigationConstants.SENDER) as Class<*>).kotlin
+        arguments?.let { arguments ->
+            if (arguments.containsKey(NavigationConstants.SENDER))
+                sender = (arguments.getSerializable(NavigationConstants.SENDER) as Class<*>).kotlin
 
-            if (it.containsKey(NavigationConstants.DATA_TYPE) && it.containsKey(NavigationConstants.DATA_OBJECT)) {
-                val type = (it.getSerializable(NavigationConstants.DATA_TYPE) as Class<*>).kotlin
-                val str = it.getString(NavigationConstants.DATA_OBJECT)
+            if (arguments.containsKey(NavigationConstants.DATA_TYPE) && arguments.containsKey(NavigationConstants.DATA_OBJECT)) {
+                val type = (arguments.getSerializable(NavigationConstants.DATA_TYPE) as Class<*>).kotlin
+                val str = arguments.getString(NavigationConstants.DATA_OBJECT)
 
                 if (!str.isNullOrEmpty())
                     data = JsonHelper.deserialize(str, type)

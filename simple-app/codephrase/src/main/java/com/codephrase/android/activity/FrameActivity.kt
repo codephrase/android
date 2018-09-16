@@ -14,6 +14,7 @@ import android.support.v7.widget.Toolbar
 import android.view.*
 import com.codephrase.android.BR
 import com.codephrase.android.R
+import com.codephrase.android.common.NavigationUri
 import com.codephrase.android.constant.NavigationConstants
 import com.codephrase.android.error.NotImplementedError
 import com.codephrase.android.error.NotSupportedError
@@ -87,16 +88,20 @@ abstract class FrameActivity : AppCompatActivity() {
         var sender: KClass<*> = this::class
         var data: Any? = null
 
-        intent.extras?.let {
-            if (it.containsKey(NavigationConstants.SENDER))
-                sender = (it.getSerializable(NavigationConstants.SENDER) as Class<*>).kotlin
+        intent.data?.let { uri ->
+            data = NavigationUri(uri)
+        } ?: run {
+            intent.extras?.let { extras ->
+                if (extras.containsKey(NavigationConstants.SENDER))
+                    sender = (extras.getSerializable(NavigationConstants.SENDER) as Class<*>).kotlin
 
-            if (it.containsKey(NavigationConstants.DATA_TYPE) && it.containsKey(NavigationConstants.DATA_OBJECT)) {
-                val type = (it.getSerializable(NavigationConstants.DATA_TYPE) as Class<*>).kotlin
-                val str = it.getString(NavigationConstants.DATA_OBJECT)
+                if (extras.containsKey(NavigationConstants.DATA_TYPE) && extras.containsKey(NavigationConstants.DATA_OBJECT)) {
+                    val type = (extras.getSerializable(NavigationConstants.DATA_TYPE) as Class<*>).kotlin
+                    val str = extras.getString(NavigationConstants.DATA_OBJECT)
 
-                if (!str.isNullOrEmpty())
-                    data = JsonHelper.deserialize(str, type)
+                    if (!str.isNullOrEmpty())
+                        data = JsonHelper.deserialize(str, type)
+                }
             }
         }
 

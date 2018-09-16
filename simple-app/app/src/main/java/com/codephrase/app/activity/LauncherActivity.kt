@@ -1,7 +1,10 @@
 package com.codephrase.app.activity
 
+import android.net.Uri
 import com.codephrase.android.activity.FrameActivity
 import com.codephrase.android.activity.StartActivity
+import com.codephrase.android.common.NavigationData
+import com.codephrase.android.common.NavigationHandler
 import com.codephrase.android.viewmodel.ViewModel
 import com.codephrase.app.viewmodel.LauncherViewModel
 import kotlin.reflect.KClass
@@ -12,4 +15,13 @@ class LauncherActivity : StartActivity() {
 
     override val navigationTargetType: KClass<out FrameActivity>
         get() = ToolbarDrawerActivity::class
+
+    override val navigationHandler: NavigationHandler?
+        get() = DeepLinkNavigationHandler()
+
+    class DeepLinkNavigationHandler : NavigationHandler {
+        override fun handleUri(uri: Uri): NavigationData? {
+            return NavigationData(FullscreenPageActivity::class)
+        }
+    }
 }
