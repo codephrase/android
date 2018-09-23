@@ -2,7 +2,6 @@ package com.codephrase.android.activity
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.databinding.DataBindingUtil
 import android.databinding.ViewDataBinding
@@ -20,6 +19,7 @@ import com.codephrase.android.error.NotImplementedError
 import com.codephrase.android.error.NotSupportedError
 import com.codephrase.android.fragment.FrameFragment
 import com.codephrase.android.helper.JsonHelper
+import com.codephrase.android.helper.NavigationHelper
 import com.codephrase.android.helper.ObjectHelper
 import com.codephrase.android.viewmodel.ViewModel
 import com.codephrase.android.viewstate.FrameActivityState
@@ -281,15 +281,7 @@ abstract class FrameActivity : AppCompatActivity() {
     }
 
     fun navigate(type: KClass<out FrameActivity>, data: Any?) {
-        val intent = Intent(this, type.java)
-        intent.putExtra(NavigationConstants.SENDER, javaClass);
-
-        data?.let {
-            intent.putExtra(NavigationConstants.DATA_TYPE, it.javaClass)
-            intent.putExtra(NavigationConstants.DATA_OBJECT, JsonHelper.serialize(it))
-        }
-
-        startActivity(intent)
+        NavigationHelper.navigateToActivity(this, type, data)
     }
 
     fun navigateFragment(type: KClass<out FrameFragment>) {
@@ -340,6 +332,10 @@ abstract class FrameActivity : AppCompatActivity() {
                 fragmentTransaction.commit()
             }
         }
+    }
+
+    fun navigateUri(uri: String) {
+        NavigationHelper.navigateToUri(this, uri)
     }
 
     internal fun clearNavigationStack() {

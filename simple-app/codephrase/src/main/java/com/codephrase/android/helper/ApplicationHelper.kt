@@ -85,11 +85,5 @@ class ApplicationHelper private constructor() {
         private fun isApiSupported(version: Int): Boolean {
             return version <= Build.VERSION.SDK_INT
         }
-
-        fun launchMainActivity() {
-            val context = getContext()
-            val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-            context.startActivity(intent)
-        }
     }
 }

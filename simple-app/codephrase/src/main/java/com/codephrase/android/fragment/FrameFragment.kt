@@ -252,6 +252,11 @@ abstract class FrameFragment : Fragment() {
         activity?.navigateFragment(type, addToBackStack)
     }
 
+    fun navigateUri(uri: String) {
+        val activity = activity as FrameActivity?
+        activity?.navigateUri(uri)
+    }
+
     fun <T : View> findViewById(@IdRes id: Int): T? {
         return view?.findViewById(id)
     }

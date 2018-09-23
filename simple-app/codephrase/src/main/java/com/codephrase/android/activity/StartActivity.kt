@@ -16,8 +16,8 @@ abstract class StartActivity : FrameActivity() {
     override fun onViewInitialized(savedInstanceState: Bundle?) {
         super.onViewInitialized(savedInstanceState)
 
-        viewModel.dataLoaded.observe(this, Observer {
-            if (it == true) {
+        viewModel.dataLoaded.observe(this, Observer { dataLoaded ->
+            if (dataLoaded == true) {
                 var type = navigationTargetType
                 var data: Any? = null
 

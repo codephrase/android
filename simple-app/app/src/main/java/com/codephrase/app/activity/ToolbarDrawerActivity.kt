@@ -1,5 +1,6 @@
 package com.codephrase.app.activity
 
+import android.view.MenuItem
 import com.codephrase.android.activity.DrawerActivity
 import com.codephrase.android.fragment.FrameFragment
 import com.codephrase.android.viewmodel.ViewModel
@@ -34,6 +35,14 @@ class ToolbarDrawerActivity : DrawerActivity() {
             R.id.nav_page_2 -> DrawerPage2Fragment::class
             R.id.nav_page_3 -> DrawerPage3Fragment::class
             else -> super.resolveFragmentType(menuId)
+        }
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem) {
+        return when (item.itemId) {
+            R.id.nav_share -> navigateUri("simple-app://home")
+            R.id.nav_send -> navigateUri("http://www.google.com")
+            else -> super.onNavigationItemSelected(item)
         }
     }
 }
