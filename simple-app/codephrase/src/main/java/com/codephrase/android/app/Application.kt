@@ -1,6 +1,10 @@
 package com.codephrase.android.app
 
+import android.content.Context
 import android.provider.Settings
+import android.support.multidex.MultiDex
+import android.support.multidex.MultiDexApplication
+import com.codephrase.android.helper.NotificationHelper
 import com.codephrase.android.helper.StorageHelper
 import java.util.*
 
@@ -25,6 +29,9 @@ abstract class Application : android.app.Application() {
         softwareId ?: ""
     }
 
+    open val multiDexEnabled: Boolean
+        get() = false
+
     open val connectTimeout: Int
         get() = 0
 
@@ -33,6 +40,13 @@ abstract class Application : android.app.Application() {
 
     init {
         instance = this
+    }
+
+    override fun attachBaseContext(base: Context?) {
+        super.attachBaseContext(base)
+
+        if (multiDexEnabled)
+            MultiDex.install(this)
     }
 
     companion object {
