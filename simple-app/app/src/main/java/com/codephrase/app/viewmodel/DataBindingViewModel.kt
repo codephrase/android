@@ -1,6 +1,6 @@
 package com.codephrase.app.viewmodel
 
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import com.codephrase.android.helper.ResourceHelper
 import com.codephrase.android.viewmodel.ViewModel
 import com.codephrase.app.R

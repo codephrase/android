@@ -1,16 +1,16 @@
 package com.codephrase.android.activity
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.content.pm.PackageManager
-import android.databinding.DataBindingUtil
-import android.databinding.ViewDataBinding
 import android.os.Bundle
-import android.support.v4.app.FragmentManager
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.codephrase.android.BR
 import com.codephrase.android.R
 import com.codephrase.android.common.navigation.NavigationUri
@@ -69,7 +69,7 @@ abstract class FrameActivity : AppCompatActivity() {
         get() = 0
 
     protected open val viewModelType: KClass<out ViewModel>
-        get() = throw NotImplementedError()
+        get() = throw NotImplementedError("viewModelType")
 
     protected var toolbar: Toolbar? = null
     protected var swipeRefreshLayout: SwipeRefreshLayout? = null
@@ -88,19 +88,20 @@ abstract class FrameActivity : AppCompatActivity() {
         var sender: KClass<*> = this::class
         var data: Any? = null
 
-        intent.data?.let { uri ->
-            data = NavigationUri(uri)
+        intent.data?.let {
+            data = NavigationUri(it)
         } ?: run {
-            intent.extras?.let { extras ->
-                if (extras.containsKey(NavigationConstants.SENDER))
-                    sender = (extras.getSerializable(NavigationConstants.SENDER) as Class<*>).kotlin
+            intent.extras?.let {
+                if (it.containsKey(NavigationConstants.SENDER))
+                    sender = (it.getSerializable(NavigationConstants.SENDER) as Class<*>).kotlin
 
-                if (extras.containsKey(NavigationConstants.DATA_TYPE) && extras.containsKey(NavigationConstants.DATA_OBJECT)) {
-                    val type = (extras.getSerializable(NavigationConstants.DATA_TYPE) as Class<*>).kotlin
-                    val str = extras.getString(NavigationConstants.DATA_OBJECT)
+                if (it.containsKey(NavigationConstants.DATA_TYPE) && it.containsKey(NavigationConstants.DATA_OBJECT)) {
+                    val type = (it.getSerializable(NavigationConstants.DATA_TYPE) as Class<*>).kotlin
+                    val str = it.getString(NavigationConstants.DATA_OBJECT)
 
-                    if (!str.isNullOrEmpty())
-                        data = JsonHelper.deserialize(str, type)
+                    str?.let {
+                        data = JsonHelper.deserialize(it, type)
+                    }
                 }
             }
         }
@@ -371,10 +372,10 @@ abstract class FrameActivity : AppCompatActivity() {
     }
 
     final override fun setTitle(title: CharSequence?) {
-        throw NotSupportedError()
+        throw NotSupportedError("setTitle")
     }
 
     final override fun setTitle(titleId: Int) {
-        throw NotSupportedError()
+        throw NotSupportedError("setTitle")
     }
 }

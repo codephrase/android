@@ -3,8 +3,8 @@ package com.codephrase.android.common.navigation
 import android.net.Uri
 
 class NavigationUri {
-    val scheme: String
-    val host: String
+    val scheme: String?
+    val host: String?
     val pathSegments: List<String>
     val queryParameters: HashMap<String, String>
 
@@ -14,7 +14,7 @@ class NavigationUri {
     val query: String
         get() {
             val arr = ArrayList<String>()
-            queryParameters.forEach { (key, value) -> arr.add("$key=$value") }
+            queryParameters.forEach { arr.add("${it.key}=${it.value}") }
             return arr.joinToString("&")
         }
 
@@ -23,14 +23,23 @@ class NavigationUri {
         host = uri.host
         pathSegments = ArrayList(uri.pathSegments)
         queryParameters = LinkedHashMap()
-        uri.queryParameterNames.forEach { queryParameterName -> queryParameters[queryParameterName] = uri.getQueryParameter(queryParameterName) }
+        uri.queryParameterNames.forEach { queryParameters[it] = uri.getQueryParameter(it) }
     }
 
     override fun toString(): String {
         val uri = StringBuilder()
-        uri.append(scheme)
-        uri.append("://")
-        uri.append(host)
+
+        scheme?.takeIf { it.isNotEmpty() }
+                ?.apply {
+                    uri.append(this)
+                    uri.append(":")
+                }
+
+        host?.takeIf { it.isNotEmpty() }
+                ?.apply {
+                    uri.append("//")
+                    uri.append(host)
+                }
 
         path.takeIf { it.isNotEmpty() }
                 ?.apply {

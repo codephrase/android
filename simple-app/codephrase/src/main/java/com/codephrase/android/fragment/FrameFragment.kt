@@ -1,17 +1,17 @@
 package com.codephrase.android.fragment
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
-import android.databinding.DataBindingUtil
-import android.databinding.ViewDataBinding
 import android.os.Bundle
-import android.support.annotation.IdRes
-import android.support.v4.app.Fragment
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.app.ActionBar
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.*
+import androidx.annotation.IdRes
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.codephrase.android.BR
 import com.codephrase.android.R
 import com.codephrase.android.activity.FrameActivity
@@ -63,7 +63,7 @@ abstract class FrameFragment : Fragment() {
         get() = 0
 
     protected open val viewModelType: KClass<out ViewModel>
-        get() = throw NotImplementedError()
+        get() = throw NotImplementedError("viewModelType")
 
     val supportActionBar: ActionBar?
         get() {
@@ -85,16 +85,17 @@ abstract class FrameFragment : Fragment() {
         var sender: KClass<*> = this::class
         var data: Any? = null
 
-        arguments?.let { arguments ->
-            if (arguments.containsKey(NavigationConstants.SENDER))
-                sender = (arguments.getSerializable(NavigationConstants.SENDER) as Class<*>).kotlin
+        arguments?.let {
+            if (it.containsKey(NavigationConstants.SENDER))
+                sender = (it.getSerializable(NavigationConstants.SENDER) as Class<*>).kotlin
 
-            if (arguments.containsKey(NavigationConstants.DATA_TYPE) && arguments.containsKey(NavigationConstants.DATA_OBJECT)) {
-                val type = (arguments.getSerializable(NavigationConstants.DATA_TYPE) as Class<*>).kotlin
-                val str = arguments.getString(NavigationConstants.DATA_OBJECT)
+            if (it.containsKey(NavigationConstants.DATA_TYPE) && it.containsKey(NavigationConstants.DATA_OBJECT)) {
+                val type = (it.getSerializable(NavigationConstants.DATA_TYPE) as Class<*>).kotlin
+                val str = it.getString(NavigationConstants.DATA_OBJECT)
 
-                if (!str.isNullOrEmpty())
-                    data = JsonHelper.deserialize(str, type)
+                str?.let {
+                    data = JsonHelper.deserialize(it, type)
+                }
             }
         }
 

@@ -1,9 +1,9 @@
 package com.codephrase.android.viewmodel
 
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.ViewModel
 import android.os.Handler
 import android.os.Looper
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 
 abstract class ViewModel : ViewModel() {
     val title = MutableLiveData<String>()

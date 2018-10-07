@@ -2,17 +2,17 @@ package com.codephrase.android.activity
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.support.design.widget.NavigationView
-import android.support.v4.view.GravityCompat
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.ActionBarDrawerToggle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import com.codephrase.android.R
 import com.codephrase.android.fragment.FrameFragment
 import com.codephrase.android.helper.ObjectHelper
 import com.codephrase.android.viewstate.DrawerActivityState
+import com.google.android.material.navigation.NavigationView
 import kotlin.reflect.KClass
 
 abstract class DrawerActivity : FrameActivity() {
@@ -65,9 +65,9 @@ abstract class DrawerActivity : FrameActivity() {
             drawer = findViewById(drawerId)
             drawer?.let { drawer ->
                 drawerToggle = ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-                drawerToggle?.let { drawerToggle ->
-                    drawer.addDrawerListener(drawerToggle)
-                    drawerToggle.syncState()
+                drawerToggle?.let {
+                    drawer.addDrawerListener(it)
+                    it.syncState()
                 }
             }
         }
@@ -75,8 +75,8 @@ abstract class DrawerActivity : FrameActivity() {
         if (navigationViewId > 0) {
             navigationView = findViewById(navigationViewId)
             navigationView?.let { navigationView ->
-                navigationView.setNavigationItemSelectedListener { item ->
-                    onNavigationItemSelected(item)
+                navigationView.setNavigationItemSelectedListener {
+                    onNavigationItemSelected(it)
                     drawer?.closeDrawer(GravityCompat.START)
                     true
                 }
@@ -87,15 +87,15 @@ abstract class DrawerActivity : FrameActivity() {
                 if (navigationMenuId > 0) {
                     navigationView.inflateMenu(navigationMenuId)
                     navigationMenu = navigationView.menu
-                    navigationMenu?.let { navigationMenu ->
+                    navigationMenu?.let {
                         if (savedInstanceState == null) {
-                            val navigationItemCount = navigationMenu.size()
+                            val navigationItemCount = it.size()
                             if (navigationItemCount > 0) {
                                 var selectedNavigationItem: MenuItem? = null
 
                                 if (homeNavigationId > 0) {
                                     for (i in 0 until navigationItemCount) {
-                                        val navigationItem = navigationMenu.getItem(i)
+                                        val navigationItem = it.getItem(i)
                                         if (navigationItem.itemId == homeNavigationId) {
                                             selectedNavigationItem = navigationItem
                                             break
@@ -104,18 +104,18 @@ abstract class DrawerActivity : FrameActivity() {
                                 }
 
                                 if (selectedNavigationItem == null)
-                                    selectedNavigationItem = navigationMenu.getItem(0)
+                                    selectedNavigationItem = it.getItem(0)
 
-                                selectedNavigationItem?.let { selectedNavigationItem ->
-                                    val homeNavigationId = selectedNavigationItem.itemId
+                                selectedNavigationItem?.let {
+                                    val homeNavigationId = it.itemId
 
                                     val drawerViewState = viewState as DrawerActivityState
                                     drawerViewState.homeNavigationId = homeNavigationId
 
-                                    if (!selectedNavigationItem.isChecked && selectedNavigationItem.isCheckable)
+                                    if (!it.isChecked && it.isCheckable)
                                         navigationView.setCheckedItem(homeNavigationId)
 
-                                    onNavigationItemSelected(selectedNavigationItem)
+                                    onNavigationItemSelected(it)
                                 }
                             }
                         }
@@ -174,8 +174,8 @@ abstract class DrawerActivity : FrameActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        drawerToggle?.let { drawerToggle ->
-            if (drawerToggle.onOptionsItemSelected(item))
+        drawerToggle?.let {
+            if (it.onOptionsItemSelected(item))
                 return true
         }
 
@@ -183,9 +183,9 @@ abstract class DrawerActivity : FrameActivity() {
     }
 
     override fun onBackPressed() {
-        drawer?.let { drawer ->
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START)
+        drawer?.let {
+            if (it.isDrawerOpen(GravityCompat.START)) {
+                it.closeDrawer(GravityCompat.START)
                 return
             }
         }
@@ -229,11 +229,11 @@ abstract class DrawerActivity : FrameActivity() {
     private fun navigateDrawer(contentContainerId: Int, type: KClass<out FrameFragment>, addToBackStack: Boolean) {
         if (contentContainerId > 0) {
             val fragment = ObjectHelper.create(type)
-            fragment?.let { fragment ->
+            fragment?.let {
                 internalBackStackModification = true
 
                 val fragmentTransaction = supportFragmentManager.beginTransaction()
-                fragmentTransaction.replace(contentContainerId, fragment)
+                fragmentTransaction.replace(contentContainerId, it)
 
                 if (addToBackStack)
                     fragmentTransaction.addToBackStack(type.qualifiedName)
@@ -246,9 +246,9 @@ abstract class DrawerActivity : FrameActivity() {
     override fun updateToolbarState(upButtonEnabled: Boolean) {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        drawerToggle?.let { drawerToggle ->
-            drawerToggle.isDrawerIndicatorEnabled = !upButtonEnabled
-            drawerToggle.syncState()
+        drawerToggle?.let {
+            it.isDrawerIndicatorEnabled = !upButtonEnabled
+            it.syncState()
         }
     }
 }

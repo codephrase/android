@@ -22,7 +22,7 @@ class SecurePreference(context: Context, name: String) {
         val hashedKey = hashKey(key)
 
         if (pref.contains(hashedKey))
-            return decryptValue(pref.getString(hashedKey, null))
+            return decryptValue(pref.getString(hashedKey, null) ?: "")
         else
             return defValue
     }
@@ -60,7 +60,7 @@ class SecurePreference(context: Context, name: String) {
         val hashedKey = hashKey(key)
 
         if (pref.contains(hashedKey))
-            return decryptValue(pref.getString(hashedKey, null)).toInt()
+            return decryptValue(pref.getString(hashedKey, null) ?: "").toInt()
         else
             return defValue
     }
@@ -75,7 +75,7 @@ class SecurePreference(context: Context, name: String) {
         val hashedKey = hashKey(key)
 
         if (pref.contains(hashedKey))
-            return decryptValue(pref.getString(hashedKey, null)).toLong()
+            return decryptValue(pref.getString(hashedKey, null) ?: "").toLong()
         else
             return defValue
     }
@@ -90,7 +90,7 @@ class SecurePreference(context: Context, name: String) {
         val hashedKey = hashKey(key)
 
         if (pref.contains(hashedKey))
-            return decryptValue(pref.getString(hashedKey, null)).toFloat()
+            return decryptValue(pref.getString(hashedKey, null) ?: "").toFloat()
         else
             return defValue
     }
@@ -105,7 +105,7 @@ class SecurePreference(context: Context, name: String) {
         val hashedKey = hashKey(key)
 
         if (pref.contains(hashedKey))
-            return decryptValue(pref.getString(hashedKey, null)).toBoolean()
+            return decryptValue(pref.getString(hashedKey, null) ?: "").toBoolean()
         else
             return defValue
     }

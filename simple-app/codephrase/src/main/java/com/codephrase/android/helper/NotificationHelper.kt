@@ -5,11 +5,11 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.codephrase.android.common.notification.*
 import com.codephrase.android.constant.NotificationConstants
-import com.codephrase.android.error.NotFoundException
+import com.codephrase.android.exception.NotFoundException
 import android.app.NotificationChannel as AndroidNotificationChannel
 import android.app.NotificationChannelGroup as AndroidNotificationGroup
 
@@ -118,7 +118,7 @@ class NotificationHelper private constructor() {
 
         private fun resolveNotificationChannel(id: String): NotificationChannel? {
             val channels = ApplicationHelper.getNotificationChannels()
-            return channels?.firstOrNull { it.id == id }
+            return channels.firstOrNull { it.id == id }
         }
 
         @TargetApi(Build.VERSION_CODES.O)

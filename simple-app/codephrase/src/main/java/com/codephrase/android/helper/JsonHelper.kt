@@ -5,14 +5,12 @@ import kotlin.reflect.KClass
 
 class JsonHelper private constructor() {
     companion object {
-        fun serialize(obj: Any): String {
-            val gson = Gson()
-            return gson.toJson(obj)
+        fun serialize(obj: Any?): String {
+            return Gson().toJson(obj)
         }
 
-        fun <T : Any> deserialize(str: String, type: KClass<T>): T {
-            val gson = Gson()
-            return gson.fromJson(str, type.java)
+        fun <T : Any> deserialize(str: String, type: KClass<T>): T? {
+            return Gson().fromJson(str, type.java)
         }
     }
 }

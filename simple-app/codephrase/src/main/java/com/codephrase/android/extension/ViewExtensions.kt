@@ -37,6 +37,7 @@ fun View.setPaddingHorizontal(paddingHorizontal: Int) = setPadding(paddingHorizo
 
 fun View.setPaddingVertical(paddingVertical: Int) = setPadding(paddingLeft, paddingVertical, paddingRight, paddingVertical)
 
+@Suppress("unchecked_cast")
 tailrec fun <T : View> View.findParent(type: KClass<T>): T {
     return if (parent::class == type) parent as T else (parent as View).findParent(type)
 }

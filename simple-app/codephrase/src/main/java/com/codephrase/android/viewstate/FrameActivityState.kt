@@ -2,7 +2,7 @@ package com.codephrase.android.viewstate
 
 import android.os.Parcel
 import android.os.Parcelable
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import com.codephrase.android.extension.readNullable
 import com.codephrase.android.extension.writeNullable
 import java.util.*

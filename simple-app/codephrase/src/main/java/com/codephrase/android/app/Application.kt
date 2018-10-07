@@ -2,7 +2,7 @@ package com.codephrase.android.app
 
 import android.content.Context
 import android.provider.Settings
-import android.support.multidex.MultiDex
+import androidx.multidex.MultiDex
 import com.codephrase.android.common.notification.NotificationChannel
 import com.codephrase.android.common.notification.NotificationGroup
 import com.codephrase.android.helper.StorageHelper
