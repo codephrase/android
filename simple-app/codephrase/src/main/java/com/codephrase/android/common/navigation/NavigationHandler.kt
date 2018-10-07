@@ -1,4 +1,4 @@
-package com.codephrase.android.common
+package com.codephrase.android.common.navigation
 
 import android.net.Uri
 

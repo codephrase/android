@@ -1,4 +1,4 @@
-package com.codephrase.android.common
+package com.codephrase.android.common.storage
 
 import android.content.Context
 import com.codephrase.android.helper.SecurityHelper

@@ -1,4 +1,4 @@
-package com.codephrase.android.common
+package com.codephrase.android.common.navigation
 
 import com.codephrase.android.activity.FrameActivity
 import kotlin.reflect.KClass

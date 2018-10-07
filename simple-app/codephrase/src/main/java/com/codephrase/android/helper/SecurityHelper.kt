@@ -1,7 +1,7 @@
 package com.codephrase.android.helper
 
 import android.util.Base64
-import com.codephrase.android.common.SecureKeyWrapper
+import com.codephrase.android.common.security.SecureKeyWrapper
 import java.io.File
 import java.security.MessageDigest
 import java.security.SecureRandom

@@ -13,7 +13,7 @@ import android.support.v7.widget.Toolbar
 import android.view.*
 import com.codephrase.android.BR
 import com.codephrase.android.R
-import com.codephrase.android.common.NavigationUri
+import com.codephrase.android.common.navigation.NavigationUri
 import com.codephrase.android.constant.NavigationConstants
 import com.codephrase.android.error.NotImplementedError
 import com.codephrase.android.error.NotSupportedError

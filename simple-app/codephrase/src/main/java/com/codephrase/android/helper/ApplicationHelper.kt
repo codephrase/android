@@ -6,6 +6,8 @@ import android.content.res.Resources
 import android.os.Build
 import android.util.DisplayMetrics
 import com.codephrase.android.app.Application
+import com.codephrase.android.common.notification.NotificationChannel
+import com.codephrase.android.common.notification.NotificationGroup
 import java.util.*
 
 class ApplicationHelper private constructor() {
@@ -40,6 +42,14 @@ class ApplicationHelper private constructor() {
 
         fun getSoftwareId(): String {
             return Application.instance.softwareId
+        }
+
+        fun getNotificationGroups(): List<NotificationGroup> {
+            return Application.instance.onCreateNotificationGroups()
+        }
+
+        fun getNotificationChannels(): List<NotificationChannel> {
+            return Application.instance.onCreateNotificationChannels()
         }
 
         fun isApiLevel18Supported(): Boolean {
@@ -83,7 +93,7 @@ class ApplicationHelper private constructor() {
         }
 
         private fun isApiSupported(version: Int): Boolean {
-            return version <= Build.VERSION.SDK_INT
+            return Build.VERSION.SDK_INT >= version
         }
     }
 }

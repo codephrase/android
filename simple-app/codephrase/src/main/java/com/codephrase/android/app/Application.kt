@@ -3,8 +3,8 @@ package com.codephrase.android.app
 import android.content.Context
 import android.provider.Settings
 import android.support.multidex.MultiDex
-import android.support.multidex.MultiDexApplication
-import com.codephrase.android.helper.NotificationHelper
+import com.codephrase.android.common.notification.NotificationChannel
+import com.codephrase.android.common.notification.NotificationGroup
 import com.codephrase.android.helper.StorageHelper
 import java.util.*
 
@@ -47,6 +47,14 @@ abstract class Application : android.app.Application() {
 
         if (multiDexEnabled)
             MultiDex.install(this)
+    }
+
+    open fun onCreateNotificationGroups(): List<NotificationGroup> {
+        return arrayListOf()
+    }
+
+    open fun onCreateNotificationChannels(): List<NotificationChannel> {
+        return arrayListOf()
     }
 
     companion object {

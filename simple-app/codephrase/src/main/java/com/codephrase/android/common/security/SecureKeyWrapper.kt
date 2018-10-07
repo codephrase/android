@@ -1,4 +1,4 @@
-package com.codephrase.android.common
+package com.codephrase.android.common.security
 
 import android.annotation.TargetApi
 import android.content.Context

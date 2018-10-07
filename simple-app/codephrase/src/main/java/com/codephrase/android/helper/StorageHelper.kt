@@ -1,7 +1,7 @@
 package com.codephrase.android.helper
 
-import com.codephrase.android.common.SecurePreference
-import com.codephrase.android.common.SharedPreference
+import com.codephrase.android.common.storage.SecurePreference
+import com.codephrase.android.common.storage.SharedPreference
 
 class StorageHelper private constructor() {
     companion object {

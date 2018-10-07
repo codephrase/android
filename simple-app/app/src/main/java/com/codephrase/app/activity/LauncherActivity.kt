@@ -3,8 +3,8 @@ package com.codephrase.app.activity
 import android.net.Uri
 import com.codephrase.android.activity.FrameActivity
 import com.codephrase.android.activity.StartActivity
-import com.codephrase.android.common.NavigationData
-import com.codephrase.android.common.NavigationHandler
+import com.codephrase.android.common.navigation.NavigationData
+import com.codephrase.android.common.navigation.NavigationHandler
 import com.codephrase.android.viewmodel.ViewModel
 import com.codephrase.app.viewmodel.LauncherViewModel
 import kotlin.reflect.KClass

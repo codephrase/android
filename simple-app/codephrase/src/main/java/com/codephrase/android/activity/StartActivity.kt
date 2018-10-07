@@ -2,7 +2,7 @@ package com.codephrase.android.activity
 
 import android.arch.lifecycle.Observer
 import android.os.Bundle
-import com.codephrase.android.common.NavigationHandler
+import com.codephrase.android.common.navigation.NavigationHandler
 import com.codephrase.android.error.NotImplementedError
 import kotlin.reflect.KClass
 
