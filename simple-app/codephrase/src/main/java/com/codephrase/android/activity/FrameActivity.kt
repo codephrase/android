@@ -79,6 +79,10 @@ abstract class FrameActivity : AppCompatActivity() {
 
     internal var internalBackStackModification: Boolean = false
 
+    private val backStackChangedListener = FragmentManager.OnBackStackChangedListener {
+        onBackStackChanged()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -211,10 +215,6 @@ abstract class FrameActivity : AppCompatActivity() {
         })
     }
 
-    private val backStackChangedListener = FragmentManager.OnBackStackChangedListener {
-        onBackStackChanged()
-    }
-
     override fun onResume() {
         super.onResume()
 
@@ -308,7 +308,7 @@ abstract class FrameActivity : AppCompatActivity() {
                 internalBackStackModification = true
 
                 val arguments = Bundle()
-                arguments.putSerializable(NavigationConstants.SENDER, javaClass);
+                arguments.putSerializable(NavigationConstants.SENDER, javaClass)
 
                 data?.let {
                     arguments.putSerializable(NavigationConstants.DATA_TYPE, it.javaClass)

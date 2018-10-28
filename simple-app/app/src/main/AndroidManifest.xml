@@ -42,6 +42,10 @@
 
         <activity android:name=".activity.ToolbarDrawerActivity" />
 
+        <activity android:name=".activity.ToolbarTabActivity" />
+
+        <activity android:name=".activity.NotificationActivity" />
+
     </application>
 
 </manifest>

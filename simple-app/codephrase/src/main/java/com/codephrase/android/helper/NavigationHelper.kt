@@ -30,7 +30,7 @@ class NavigationHelper private constructor() {
 
         fun navigateToActivity(context: Context, type: KClass<out FrameActivity>, data: Any?) {
             val intent = Intent(context, type.java)
-            intent.putExtra(NavigationConstants.SENDER, context.javaClass);
+            intent.putExtra(NavigationConstants.SENDER, context.javaClass)
 
             data?.let {
                 intent.putExtra(NavigationConstants.DATA_TYPE, it.javaClass)
