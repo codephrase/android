@@ -1,19 +1,17 @@
 package com.codephrase.android.common.viewpager
 
+import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import com.codephrase.android.constant.NavigationConstants
+import com.codephrase.android.helper.JsonHelper
 
-open class ViewPagerAdapter : FragmentPagerAdapter {
+abstract class ViewPagerAdapter : FragmentPagerAdapter {
     private var items: List<Any>? = null
-    private var delegate: ViewPagerDelegate?
 
     constructor(manager: FragmentManager) : super(manager) {
-        this.delegate = null
-    }
 
-    constructor(manager: FragmentManager, delegate: ViewPagerDelegate) : super(manager) {
-        this.delegate = delegate
     }
 
     fun getItems(): List<Any>? {
@@ -25,14 +23,28 @@ open class ViewPagerAdapter : FragmentPagerAdapter {
     }
 
     override fun getCount(): Int {
-        return delegate?.let { it.getItemCount() } ?: run { 0 }
+        return items?.size ?: 0
     }
 
-    override fun getPageTitle(position: Int): CharSequence? {
-        return delegate?.let { it.getItemTitle(position) } ?: run { super.getPageTitle(position) }
+    open fun getItemObject(position: Int): Any? {
+        return items?.get(position)
     }
 
-    override fun getItem(position: Int): Fragment {
-        return delegate?.let { it.getItemView(position) } ?: run { Fragment() }
+    open fun getItemView(position: Int): Fragment {
+        return Fragment()
+    }
+
+    final override fun getItem(position: Int): Fragment {
+        val fragment = getItemView(position)
+
+        val item = getItemObject(position)
+        item?.let {
+            val arguments = fragment.arguments ?: Bundle()
+            arguments.putSerializable(NavigationConstants.DATA_TYPE, it.javaClass)
+            arguments.putString(NavigationConstants.DATA_OBJECT, JsonHelper.serialize(it))
+            fragment.arguments = arguments
+        }
+
+        return fragment
     }
 }

@@ -82,13 +82,9 @@ abstract class FrameFragment : Fragment() {
         viewState = savedInstanceState?.getParcelable("view-state") ?: onCreateViewState()
         viewModel = ViewModelProviders.of(this).get(viewModelType.java)
 
-        var sender: KClass<*> = this::class
         var data: Any? = null
 
         arguments?.let {
-            if (it.containsKey(NavigationConstants.SENDER))
-                sender = (it.getSerializable(NavigationConstants.SENDER) as Class<*>).kotlin
-
             if (it.containsKey(NavigationConstants.DATA_TYPE) && it.containsKey(NavigationConstants.DATA_OBJECT)) {
                 val type = (it.getSerializable(NavigationConstants.DATA_TYPE) as Class<*>).kotlin
                 val str = it.getString(NavigationConstants.DATA_OBJECT)
@@ -99,7 +95,7 @@ abstract class FrameFragment : Fragment() {
             }
         }
 
-        onNavigated(sender, data)
+        onNavigated(data)
 
         if (toolbarEnabled)
             setHasOptionsMenu(true)
@@ -234,7 +230,7 @@ abstract class FrameFragment : Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    protected open fun onNavigated(sender: KClass<*>, data: Any?) {
+    protected open fun onNavigated(data: Any?) {
         viewModel.onNavigatedInternal(data)
     }
 

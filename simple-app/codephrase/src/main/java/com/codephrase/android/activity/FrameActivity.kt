@@ -89,16 +89,12 @@ abstract class FrameActivity : AppCompatActivity() {
         viewState = savedInstanceState?.getParcelable("view-state") ?: onCreateViewState()
         viewModel = ViewModelProviders.of(this).get(viewModelType.java)
 
-        var sender: KClass<*> = this::class
         var data: Any? = null
 
         intent.data?.let {
             data = NavigationUri(it)
         } ?: run {
             intent.extras?.let {
-                if (it.containsKey(NavigationConstants.SENDER))
-                    sender = (it.getSerializable(NavigationConstants.SENDER) as Class<*>).kotlin
-
                 if (it.containsKey(NavigationConstants.DATA_TYPE) && it.containsKey(NavigationConstants.DATA_OBJECT)) {
                     val type = (it.getSerializable(NavigationConstants.DATA_TYPE) as Class<*>).kotlin
                     val str = it.getString(NavigationConstants.DATA_OBJECT)
@@ -110,7 +106,7 @@ abstract class FrameActivity : AppCompatActivity() {
             }
         }
 
-        onNavigated(sender, data)
+        onNavigated(data)
 
         val container = findViewById<ViewGroup>(android.R.id.content)
 
@@ -262,7 +258,7 @@ abstract class FrameActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    protected open fun onNavigated(sender: KClass<*>, data: Any?) {
+    protected open fun onNavigated(data: Any?) {
         viewModel.onNavigatedInternal(data)
     }
 
@@ -304,21 +300,18 @@ abstract class FrameActivity : AppCompatActivity() {
     private fun navigateFragment(contentContainerId: Int, type: KClass<out FrameFragment>, data: Any?, addToBackStack: Boolean) {
         if (contentContainerId > 0) {
             val fragment = ObjectHelper.create(type)
-            fragment?.let {
+            fragment?.let { fr ->
                 internalBackStackModification = true
 
-                val arguments = Bundle()
-                arguments.putSerializable(NavigationConstants.SENDER, javaClass)
-
                 data?.let {
+                    val arguments = fr.arguments ?: Bundle()
                     arguments.putSerializable(NavigationConstants.DATA_TYPE, it.javaClass)
                     arguments.putString(NavigationConstants.DATA_OBJECT, JsonHelper.serialize(it))
+                    fr.arguments = arguments
                 }
 
-                it.arguments = arguments
-
                 val fragmentTransaction = supportFragmentManager.beginTransaction()
-                fragmentTransaction.replace(contentContainerId, it)
+                fragmentTransaction.replace(contentContainerId, fr)
 
                 if (addToBackStack) {
                     fragmentTransaction.addToBackStack(type.qualifiedName)

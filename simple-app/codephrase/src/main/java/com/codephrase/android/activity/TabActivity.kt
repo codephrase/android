@@ -55,11 +55,15 @@ abstract class TabActivity : FrameActivity() {
                         return this@TabActivity.getItemCount()
                     }
 
+                    override fun getItemObject(position: Int): Any? {
+                        return this@TabActivity.getItemObject(position)
+                    }
+
                     override fun getPageTitle(position: Int): CharSequence? {
                         return this@TabActivity.getItemTitle(position)
                     }
 
-                    override fun getItem(position: Int): Fragment {
+                    override fun getItemView(position: Int): Fragment {
                         return this@TabActivity.getItemView(position)
                     }
                 }
@@ -72,6 +76,10 @@ abstract class TabActivity : FrameActivity() {
 
     protected open fun getItemCount(): Int {
         return 0
+    }
+
+    protected open fun getItemObject(position: Int): Any? {
+        return null
     }
 
     protected open fun getItemTitle(position: Int): CharSequence? {

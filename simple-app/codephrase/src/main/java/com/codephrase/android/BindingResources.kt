@@ -9,4 +9,9 @@ private class BindingResources() : BaseObservable() {
         @Bindable get() {
             return null
         }
+
+    val item: Any?
+        @Bindable get() {
+            return null
+        }
 }

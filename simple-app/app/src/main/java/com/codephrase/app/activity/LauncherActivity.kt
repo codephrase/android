@@ -14,7 +14,7 @@ class LauncherActivity : StartActivity() {
         get() = LauncherViewModel::class
 
     override val navigationTargetType: KClass<out FrameActivity>
-        get() = ToolbarTabActivity::class
+        get() = ToolbarRecyclerActivity::class
 
     override val navigationHandler: NavigationHandler?
         get() = DeepLinkNavigationHandler()

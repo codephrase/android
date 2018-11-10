@@ -44,6 +44,8 @@
 
         <activity android:name=".activity.ToolbarTabActivity" />
 
+        <activity android:name=".activity.ToolbarRecyclerActivity" />
+
         <activity android:name=".activity.NotificationActivity" />
 
     </application>
