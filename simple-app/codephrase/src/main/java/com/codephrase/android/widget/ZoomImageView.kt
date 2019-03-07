@@ -142,14 +142,14 @@ open class ZoomImageView : View {
             if (intrinsicAspect != boundAspect) {
                 if (boundAspect > intrinsicAspect) {
                     // New width is larger. Make it smaller to match height.
-                    val width = (h * intrinsicAspect).toInt()
-                    left = (w - width) / 2
-                    right = left + width
+                    val newWidth = (h * intrinsicAspect).toInt()
+                    left = (w - newWidth) / 2
+                    right = left + newWidth
                 } else {
                     // New height is larger. Make it smaller to match width.
-                    val height = (w * (1 / intrinsicAspect)).toInt()
-                    top = (h - height) / 2
-                    bottom = top + height
+                    val newHeight = (w * (1 / intrinsicAspect)).toInt()
+                    top = (h - newHeight) / 2
+                    bottom = top + newHeight
                 }
             }
 
